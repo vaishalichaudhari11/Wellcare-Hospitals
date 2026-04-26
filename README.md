@@ -1,25 +1,26 @@
-<<<<<<< HEAD
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Wellcare Hospitals
 
-This contains everything you need to run your app locally.
+AI-based medical diagnosis and doctor recommendation system that analyzes user-uploaded images and symptoms to suggest possible conditions and relevant medical departments. Built using React and TypeScript, this prototype demonstrates intelligent healthcare assistance with a user-friendly interface.
 
-View your app in AI Studio: https://ai.studio/apps/de05ced2-15f1-4548-bd2a-40681c09f39c
+## 🚀 Run Locally
 
-## Run Locally
+**Prerequisites:** Node.js
 
-**Prerequisites:**  Node.js
+1. Install dependencies  
+   npm install  
 
+2. Set API key in `.env.local`  
+   GEMINI_API_KEY=your_api_key_here  
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
-=======
-# Wellcare-Hospitals
-AI-based medical diagnosis and doctor recommendation system that analyzes user-uploaded images and symptoms to suggest possible conditions and relevant medical departments. Built using React, TypeScript, and AI integration, this prototype demonstrates intelligent healthcare assistance with a user-friendly interface. 
->>>>>>> b4b4a4ec6bfff52bdeeefcef1dcb4a20f32d9408
+3. Run the app  
+   npm run dev  
+
+## 🔗 AI Studio Link
+https://ai.studio/apps/de05ced2-15f1-4548-bd2a-40681c09f39c
+
+## ⚠️ Disclaimer
+This is a prototype project for educational purposes and not intended for real medical diagnosis.
