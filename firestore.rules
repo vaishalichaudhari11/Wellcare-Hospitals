@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definition
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Phase 4: Drafting the "Fortress" Rules
+
+    // 1. Users Collection
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['name', 'email', 'createdAt']) 
+          && data.keys().size() == 3
+          && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+          && data.email is string && data.email.size() <= 100
+          && data.createdAt is string; // Wait, app sends ISO string
+      }
+
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming())
+        && incoming().email == existing().email
+        && incoming().createdAt == existing().createdAt;
+    }
+
+    // 2. Bookings Collection
+    match /bookings/{bookingId} {
+      function isValidBooking(data) {
+        return data.keys().hasAll(['patientName', 'email', 'phone', 'departmentId', 'date', 'time', 'userId', 'status', 'createdAt'])
+          && data.patientName is string && data.patientName.size() <= 100
+          && data.email is string && data.email.size() <= 100
+          && data.phone is string && data.phone.size() <= 20
+          && data.departmentId is string && data.departmentId.size() <= 100
+          && data.date is string && data.date.size() == 10
+          && data.time is string && data.time.size() <= 20
+          && data.userId == request.auth.uid
+          && data.status in ['pending', 'confirmed', 'cancelled'];
+      }
+
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() 
+        && isValidBooking(incoming())
+        && incoming().createdAt == request.time
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+
+      allow update: if isOwner(existing().userId)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+        && incoming().status == 'cancelled'
+        && existing().status == 'pending';
+        
+      allow delete: if false; // Prefer status cancellation over deletion
+    }
+  }
+}
